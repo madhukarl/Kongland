@@ -1,0 +1,160 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package kongland;
+
+/**
+ *
+ * @author Madhukar
+ */
+public class SqlSchemas {
+
+    public static String loansWithFundIdSchema(String fromDateValueString, String toDateValueString, String selectedFundId) {
+        return " Select CASE Date_format(a.action_date, '%m') WHEN 04 THEN '1' WHEN 05 THEN '2' WHEN 06 THEN '3' WHEN 07 THEN '4' WHEN 08 THEN '5' WHEN 09 THEN '6' WHEN 10 THEN '7' WHEN 11 THEN '8' WHEN 12 THEN '9' WHEN 01 THEN '10' WHEN 02 THEN '11' WHEN 03 THEN '12' ELSE Date_format(a.action_date, '%m') END as 'Month' ,Date_format(a.action_date, '%Y-%m-%d') as 'Transaction date','G' as 'XXX',b.glcodevalue as 'debit account', "
+                + "  CASE a.account_action_id "
+                + "      WHEN 1 THEN 'LoanRepa' "
+                + "      WHEN 9 THEN 'Adjustme' "
+                + "      WHEN 10 THEN 'Disbursa' "
+                + "      WHEN 19 THEN 'Disrburs' "
+                + " ELSE a.account_action_id "
+                + " END as 'description', "
+                + "Concat(a.global_account_num,'Loan') as 'description1',a.posted_amount as 'amount',0,0,a.glcodevalue as 'Credit account',Null,Null "
+                + " from ( "
+                + "  Select atrxn.account_trxn_id,posted_amount,fintrxn.action_date,debit_credit_flag,glcode_value as 'glcodevalue',coa_name,fintrxn.fin_action_id,a.global_account_num,atrxn.account_action_id "
+                + "  from financial_trxn  fintrxn "
+                + "                   INNER JOIN gl_code gl ON gl.glcode_id = fintrxn.glcode_id "
+                + "                  INNER JOIN coa ON coa.glcode_id = gl.glcode_id "
+                + "                  INNER JOIN account_trxn atrxn ON atrxn.account_trxn_id = fintrxn.account_trxn_id "
+                + "                  INNER JOIN ACCOUNT a ON a.account_id = atrxn.account_id "
+                + "                 inner join loan_account la on a.account_id=la.account_id "
+                + "  where "
+                + "  fintrxn.action_date BETWEEN '" + fromDateValueString + "' AND '" + toDateValueString + "' "
+                + "   and la.fund_id=" + selectedFundId
+                + "   and debit_credit_flag=1 ) a, "
+                + "   (Select atrxn.account_trxn_id,posted_amount,fintrxn.action_date,debit_credit_flag,glcode_value as 'glcodevalue',coa_name,fintrxn.fin_action_id,a.global_account_num,atrxn.account_action_id "
+                + "    from financial_trxn  fintrxn "
+                + "                    INNER JOIN gl_code gl ON gl.glcode_id = fintrxn.glcode_id "
+                + "                    INNER JOIN coa ON coa.glcode_id = gl.glcode_id "
+                + "                    INNER JOIN account_trxn atrxn ON atrxn.account_trxn_id = fintrxn.account_trxn_id "
+                + "                    INNER JOIN account a ON a.account_id = atrxn.account_id "
+                + "                    inner join loan_account la on a.account_id=la.account_id "
+                + "   where "
+                + "    fintrxn.action_date BETWEEN '" + fromDateValueString + "' AND '" + toDateValueString + "' "
+                + "    and la.fund_id=" + selectedFundId
+                + "    and debit_credit_flag=0 order by 1) b "
+                + "     where a.account_trxn_id = b.account_trxn_id and a.fin_action_id=b.fin_action_id ";
+    }
+
+    public static String loansWithoutFundIdSchema(String fromDateValueString, String toDateValueString) {
+        return " Select CASE Date_format(a.action_date, '%m') WHEN 04 THEN '1' WHEN 05 THEN '2' WHEN 06 THEN '3' WHEN 07 THEN '4' WHEN 08 THEN '5' WHEN 09 THEN '6' WHEN 10 THEN '7' WHEN 11 THEN '8' WHEN 12 THEN '9' WHEN 01 THEN '10' WHEN 02 THEN '11' WHEN 03 THEN '12' ELSE Date_format(a.action_date, '%m') END as 'Month' ,Date_format(a.action_date, '%Y-%m-%d') as 'Transaction date','G' as 'XXX',b.glcodevalue as 'debit account', "
+                + "  CASE a.account_action_id "
+                + "      WHEN 1 THEN 'LoanRepa' "
+                + "      WHEN 9 THEN 'Adjustme' "
+                + "      WHEN 10 THEN 'Disbursa' "
+                + "      WHEN 19 THEN 'Disrburs' "
+                + " ELSE a.account_action_id "
+                + " END as 'description', "
+                + "Concat(a.global_account_num,'Loan') as 'description1',a.posted_amount as 'amount',0,0,a.glcodevalue as 'Credit account',Null,Null"
+                + " from ( "
+                + "  Select atrxn.account_trxn_id,posted_amount,fintrxn.action_date,debit_credit_flag,glcode_value as 'glcodevalue',coa_name,fintrxn.fin_action_id,a.global_account_num,atrxn.account_action_id "
+                + "  from financial_trxn  fintrxn "
+                + "                   INNER JOIN gl_code gl ON gl.glcode_id = fintrxn.glcode_id "
+                + "                  INNER JOIN coa ON coa.glcode_id = gl.glcode_id "
+                + "                  INNER JOIN account_trxn atrxn ON atrxn.account_trxn_id = fintrxn.account_trxn_id "
+                + "                  INNER JOIN ACCOUNT a ON a.account_id = atrxn.account_id "
+                + "                 inner join loan_account la on a.account_id=la.account_id "
+                + "  where "
+                + "  fintrxn.action_date BETWEEN '" + fromDateValueString + "' AND '" + toDateValueString + "' "
+                + "   and la.fund_id is null "
+                + "   and debit_credit_flag=1 ) a, "
+                + "   (Select atrxn.account_trxn_id,posted_amount,fintrxn.action_date,debit_credit_flag,glcode_value as 'glcodevalue',coa_name,fintrxn.fin_action_id,a.global_account_num,atrxn.account_action_id "
+                + "    from financial_trxn  fintrxn "
+                + "                    INNER JOIN gl_code gl ON gl.glcode_id = fintrxn.glcode_id "
+                + "                    INNER JOIN coa ON coa.glcode_id = gl.glcode_id "
+                + "                    INNER JOIN account_trxn atrxn ON atrxn.account_trxn_id = fintrxn.account_trxn_id "
+                + "                    INNER JOIN account a ON a.account_id = atrxn.account_id "
+                + "                    inner join loan_account la on a.account_id=la.account_id "
+                + "   where "
+                + "    fintrxn.action_date BETWEEN '" + fromDateValueString + "' AND '" + toDateValueString + "' "
+                + "    and la.fund_id is null "
+                + "    and debit_credit_flag=0 order by 1) b "
+                + "     where a.account_trxn_id = b.account_trxn_id and a.fin_action_id=b.fin_action_id ";
+    }
+
+    public static String savingsSchema(String fromDateValueString, String toDateValueString, String selectedFundId) {
+        return "Select CASE Date_format(a.action_date, '%m') WHEN 04 THEN '1' WHEN 05 THEN '2' WHEN 06 THEN '3' WHEN 07 THEN '4' WHEN 08 THEN '5' WHEN 09 THEN '6' WHEN 10 THEN '7' WHEN 11 THEN '8' WHEN 12 THEN '9' WHEN 01 THEN '10' WHEN 02 THEN '11' WHEN 03 THEN '12' ELSE Date_format(a.action_date, '%m') END as 'Month' ,Date_format(a.action_date, '%Y-%m-%d') as 'Transaction date','G' as 'XXX',b.glcodevalue as 'debit account', "
+                + "CASE a.account_action_id "
+                + "     WHEN 6 THEN 'Deposit' "
+                + "     WHEN 7 THEN 'Withdrawal' "
+                + "     WHEN 11 THEN 'Intrestpost' "
+                + "     WHEN 14 THEN 'Adjustment' "
+                + "ELSE a.account_action_id "
+                + "END as 'description', "
+                + "Concat(a.global_account_num,'Saving') as 'description1',a.posted_amount as 'amount',0,0,Null,Null,a.glcodevalue as 'Credit account' "
+                + "from ( "
+                + "Select atrxn.account_trxn_id,posted_amount,fintrxn.action_date,debit_credit_flag,glcode_value as 'glcodevalue',coa_name,fintrxn.fin_action_id,a.global_account_num,atrxn.account_action_id "
+                + "from financial_trxn  fintrxn "
+                + "                 INNER JOIN gl_code gl ON gl.glcode_id = fintrxn.glcode_id "
+                + "                 INNER JOIN coa ON coa.glcode_id = gl.glcode_id "
+                + "                 INNER JOIN account_trxn atrxn ON atrxn.account_trxn_id = fintrxn.account_trxn_id "
+                + "                 INNER JOIN ACCOUNT a ON a.account_id = atrxn.account_id "
+                + "                 inner join savings_account la on a.account_id=la.account_id "
+                + "                 INNER JOIN question_group_instance ggi on la.account_id = ggi.entity_id   "
+                + "                 INNER JOIN question_group_response ggr on ggi.id = ggr.question_group_instance_id "
+                + "where  ggi.question_group_id=20  and "
+                + "fintrxn.action_date BETWEEN '" + fromDateValueString + "' AND '" + toDateValueString + "' "
+                + "and ggr.response='" + selectedFundId + "'"
+                + "and debit_credit_flag=1 ) a, "
+                + "(Select atrxn.account_trxn_id,posted_amount,fintrxn.action_date,debit_credit_flag,glcode_value as 'glcodevalue',coa_name,fintrxn.fin_action_id,a.global_account_num,atrxn.account_action_id "
+                + "from financial_trxn  fintrxn "
+                + "                 INNER JOIN gl_code gl ON gl.glcode_id = fintrxn.glcode_id "
+                + "                 INNER JOIN coa ON coa.glcode_id = gl.glcode_id "
+                + "                 INNER JOIN account_trxn atrxn ON atrxn.account_trxn_id = fintrxn.account_trxn_id "
+                + "                 INNER JOIN account a ON a.account_id = atrxn.account_id "
+                + "                 inner join savings_account la on a.account_id=la.account_id "
+                + "                 INNER JOIN question_group_instance ggi on la.account_id = ggi.entity_id "
+                + "                 INNER JOIN question_group_response ggr on ggi.id = ggr.question_group_instance_id "
+                + "where  ggi.question_group_id=20 and "
+                + "fintrxn.action_date BETWEEN '" + fromDateValueString + "' AND '" + toDateValueString + "' "
+                + "and ggr.response='" + selectedFundId + "'"
+                + "and debit_credit_flag=0 order by 1) b "
+                + "where a.account_trxn_id = b.account_trxn_id and a.fin_action_id=b.fin_action_id";
+
+    }
+
+    public static String othersSchema(String fromDateValueString, String toDateValueString,String selectedFundId) {
+        return " Select a.account_action_id, CASE Date_format(a.action_date, '%m') WHEN 04 THEN '1' WHEN 05 THEN '2' WHEN 06 THEN '3' WHEN 07 THEN '4' WHEN 08 THEN '5' WHEN 09 THEN '6' WHEN 10 THEN '7' WHEN 11 THEN '8' WHEN 12 THEN '9' WHEN 01 THEN '10' WHEN 02 THEN '11' WHEN 03 THEN '12' ELSE Date_format(a.action_date, '%m') END as 'Month' ,Date_format(a.action_date, '%Y-%m-%d') as 'Transaction date','G' as 'XXX',b.glcodevalue as 'debit account', "
+                + " (Select SUBSTRING(b.lookup_name,17) from financial_action c, lookup_value b where c.lookup_id=b.lookup_id  "
+                + " and a.fin_action_id=c.fin_action_id) as 'fin_action', "
+                + " (Select SUBSTRING(b.lookup_name,15) from account_action c, lookup_value b where c.lookup_id=b.lookup_id  "
+                + " and a.account_action_id=c.account_action_id) as 'acc_action', "
+                + " Concat(a.global_account_num,'Loan') as 'description1',a.posted_amount as 'amount',0,0,Null,Null,a.glcodevalue as 'Credit account' "
+                + " from ( "
+                + " Select atrxn.account_trxn_id,posted_amount,fintrxn.action_date,debit_credit_flag,glcode_value as 'glcodevalue',coa_name,fintrxn.fin_action_id,a.global_account_num,atrxn.account_action_id "
+                + " from financial_trxn  fintrxn "
+                + "                  INNER JOIN gl_code gl ON gl.glcode_id = fintrxn.glcode_id "
+                + "                  INNER JOIN coa ON coa.glcode_id = gl.glcode_id "
+                + "                  INNER JOIN account_trxn atrxn ON atrxn.account_trxn_id = fintrxn.account_trxn_id "
+                + "                  INNER JOIN ACCOUNT a ON a.account_id = atrxn.account_id "
+                +"                   INNER JOIN question_group_instance ggi on a.account_id = ggi.entity_id "  
+                +"                   INNER JOIN question_group_response ggr on ggi.id = ggr.question_group_instance_id "
+                + " where ggi.question_group_id=19  and atrxn.account_action_id in(2,3,4,5,8,12,13) and "
+                + " fintrxn.action_date BETWEEN '" + fromDateValueString + "' AND '" + toDateValueString + "' "
+                + "and ggr.response='" + selectedFundId + "'"
+                + " and debit_credit_flag=1 ) a, "
+                + " (Select atrxn.account_trxn_id,posted_amount,fintrxn.action_date,debit_credit_flag,glcode_value as 'glcodevalue',coa_name,fintrxn.fin_action_id,a.global_account_num,atrxn.account_action_id "
+                + " from financial_trxn  fintrxn "
+                + "                 INNER JOIN gl_code gl ON gl.glcode_id = fintrxn.glcode_id "
+                + "                 INNER JOIN coa ON coa.glcode_id = gl.glcode_id "
+                + "                 INNER JOIN account_trxn atrxn ON atrxn.account_trxn_id = fintrxn.account_trxn_id "
+                + "                 INNER JOIN account a ON a.account_id = atrxn.account_id "
+                + "                   INNER JOIN question_group_instance ggi on a.account_id = ggi.entity_id "  
+                + "                   INNER JOIN question_group_response ggr on ggi.id = ggr.question_group_instance_id "               
+                + " where ggi.question_group_id=19 and atrxn.account_action_id in(2,3,4,5,8,12,13) and "
+                + " fintrxn.action_date BETWEEN '" + fromDateValueString + "' AND '" + toDateValueString + "' "
+                + " and ggr.response='" + selectedFundId + "'"
+                + " and debit_credit_flag=0 order by 1) b "
+                + " where a.account_trxn_id = b.account_trxn_id and a.fin_action_id=b.fin_action_id";
+    }
+}
